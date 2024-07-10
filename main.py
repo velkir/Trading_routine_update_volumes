@@ -13,16 +13,20 @@
 #Если тикер есть в обоих списках, то обновить ячейку B
 #Если тикера нету в Google sheets Data, то записать тикер в первую пустую ячейку А и записать объем в соседнюю с ней ячейку.
 
-
+#НЕ РЕАЛИЗОВАНО
 #Если тикер есть в Google sheets Data и нету в Binance data, то закрасить ячейку с тикером красным и зачеркнуть текст в ячейке с тикером
 
 
 import gspread
 import ccxt
 import time
+import os
 
-def get_blacklist(path="blacklist.txt"):
-    file = open(path, "r")
+def get_blacklist(filename="blacklist.txt"):
+    project_root_dir = os.path.dirname(os.path.abspath(__file__))
+    filepath = os.path.join(project_root_dir , filename)
+
+    file = open(filepath, "r")
     blacklist = file.read().split("\n")
     return blacklist
 
@@ -35,7 +39,6 @@ def get_tickers_from_binance(exchange):
         for key, ticker in raw_data.items():
             if str(key).endswith("/USDT") and str(key) not in blacklist:
                 tickers_and_volume[key.replace("/", "")] = [int(ticker["quoteVolume"])]
-                # tickers_and_volume.append([key.replace("/", ""), int(ticker["quoteVolume"])])
     except Exception as e:
         print(f"An error occurred: {e}")
 
@@ -66,7 +69,6 @@ def update_spreadsheet(binance_volume, spreadsheet_tickers, spreadsheet="Busines
     sh = gc.open(spreadsheet)
     worksheet = sh.worksheet(worksheet)
 
-
     for i, spreadsheet_ticker in enumerate(spreadsheet_tickers):
         if i>=30 and i%30==0:
             time.sleep(60.5)
@@ -83,6 +85,4 @@ spreadsheet_tickers = get_tickers_from_spreadsheet(worksheet="Test")
 spreadsheet_tickers, delisted_tickers = check_missing_tickers(binance_tickers, spreadsheet_tickers)
 
 update_spreadsheet(binance_tickers, spreadsheet_tickers)
-# print("После: {}".format(len(updated_spreadsheet_tickers)))
-# print("Delisted_tickers: {}".format(delisted_tickers))
-# print(updated_spreadsheet_tickers)
+print("Delisted_tickers: {}".format(delisted_tickers))
