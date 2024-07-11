@@ -39,7 +39,7 @@ def get_tickers_from_binance(exchange):
     try:
         raw_data = exchange.fetch_tickers()
         for key, ticker in raw_data.items():
-            if str(key).endswith("/USDT") and str(key) not in blacklist:
+            if str(key).endswith("/USDT") and str(key).replace("/", "") not in blacklist:
                 tickers_and_volume[key.replace("/", "")] = [int(ticker["quoteVolume"])]
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -85,10 +85,10 @@ def update_spreadsheet(binance_volume, spreadsheet_tickers, spreadsheet="Busines
 
     for i, spreadsheet_ticker in enumerate(spreadsheet_tickers):
         print("{} Updating {} ticker.".format(current_time(), spreadsheet_ticker))
-        if i>=30 and i%30==0:
+        if i>=60 and i%60==0:
             time.sleep(60.5)
         value = binance_volume.get(spreadsheet_ticker)[0]
-        worksheet.update_acell(label=f"A{i + 2}", value=spreadsheet_ticker)
+        # worksheet.update_acell(label=f"A{i + 2}", value=spreadsheet_ticker)
         worksheet.update_acell(label=f"B{i + 2}", value=value)
     print("{} Spreadsheet has been successfully updated!.".format(current_time()))
 
